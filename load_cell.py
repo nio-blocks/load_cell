@@ -1,4 +1,7 @@
 
+from oserial import Serial
+
+
 class LoadCell():
     def __init__(self, port='/dev/ttyUSB0', baud=38400):
         self._port = Serial(port, baud, 0.05, b'\r')
