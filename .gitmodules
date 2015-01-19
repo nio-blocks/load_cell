@@ -1,0 +1,3 @@
+[submodule "oserial"]
+	path = oserial
+	url = git@github.com:cloudformdesign/oserial.git
