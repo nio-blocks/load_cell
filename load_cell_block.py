@@ -8,20 +8,24 @@ from nio.metadata.properties.int import IntProperty
 from nio.metadata.properties.holder import PropertyHolder
 from nio.common.discovery import Discoverable, DiscoverableType
 
-from .load_cell import LoadCell
+from .load_cell import LoadCellReader
 
 
 @Discoverable(DiscoverableType.block)
-class LoadCell(Block, LoadCell):
-    sname = StringProperty(tile="Signal Name", default="cell")
+class LoadCell(LoadCellReader, Block):
+    sname = StringProperty(tile="Signal Name", default="load")
     format = StringProperty(title="Format",
                             default=r'([a-zA-Z])(\w*)(\d{6})(\d{3})(\d{3})')
     address = StringProperty(title="Address", default='/dev/ttyUSB0')
     baud = IntProperty(title="Baud", default=115200)
 
+    def __init__(self):
+        Block.__init__(self)
+
     def configure(self, context):
         super().configure(context)
-        self._cell = LoadCell(self.format.encode(), self.address, self.baud)
+        LoadCellReader.__init__(
+            self, self.format.encode(), self.address, self.baud)
 
     def _parse(self, sdata):
         super()._parse(sdata)

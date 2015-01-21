@@ -1,24 +1,21 @@
 import re
 from datetime import datetime
-import time
 from collections import deque
 from threading import Lock
 
 from .oserial import Serial
 
-DATA_FORMAT =
 
-
-class LoadCell(Serial):
-    def __init__(self, format, port='/dev/ttyUSB0', baud=38400, log=None):
+class LoadCellReader(Serial):
+    def __init__(self, fmat, port='/dev/ttyUSB0', baud=38400, log=None):
         self.log = log
-        re.compile(format).match
+        self.fmat = re.compile(fmat).match
         self._lock = Lock()
         self.data = deque()
         super().__init__(port, baud, 0.05, b'\r')
 
     def _parse(self, sdata):
-        df = DATA_FORMAT
+        df = self.fmat
         raw = self.raw
         mydata = self.data
         super()._parse(sdata)
@@ -47,6 +44,7 @@ class LoadCell(Serial):
         while mydata:
             data.append(mydata.pop())
         return data
+
 
 def _test():
     from pprint import pprint
