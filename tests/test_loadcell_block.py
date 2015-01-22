@@ -9,19 +9,17 @@ data = (b'B035851000197104100\rA035848000000104100\rB035851000197104100\r' +
         b'A035848000104104100\rB035851000197104100\r')
 
 
-class TestDHTBlock(NIOBlockTestCase):
+class TestLoadCellBlock(NIOBlockTestCase):
     def signals_notified(self, signals):
         self._signals = signals
 
-    def test_flame_detect(self):
-        """This should be run when there is no flame"""
+    def test_load_cell_read(self):
         notified = 0
 
         blk = LoadCell()
         self.configure_block(blk, {'address': ''})
         blk.start()
         blk._parse(data)
-        # just read some temperatures and print them
         notified += 5
         self.assert_num_signals_notified(notified, blk)
         self.assertEqual(self._signals[0].load['weight'], 197)

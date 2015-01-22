@@ -15,7 +15,9 @@ from .load_cell import LoadCellReader
 class LoadCell(LoadCellReader, Block):
     sname = StringProperty(tile="Signal Name", default="load")
     format = StringProperty(title="Format",
-                            default=r'([a-zA-Z])(\w*)(\d{6})(\d{3})(\d{3})')
+                            default=r'(?P<token>[a-zA-Z])(?P<id>\w*)'
+                            r'(?P<weight>\d{6})(?P<temperature>\d{3})'
+                            r'(?P<battery>\d{3})')
     address = StringProperty(title="Address", default='/dev/ttyUSB0')
     baud = IntProperty(title="Baud", default=115200)
 
@@ -30,7 +32,8 @@ class LoadCell(LoadCellReader, Block):
     def start(self):
         Block.start(self)
         LoadCellReader.__init__(
-            self, self.format.encode(), self.address, self.baud)
+            self, self.format.encode(), self.address, self.baud,
+            log=self._logger)
         self._logger.debug("Started")
 
     def _parse(self, sdata):
