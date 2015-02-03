@@ -8,7 +8,7 @@ from .oserial import Serial
 class LoadCellReader(Serial):
     def __init__(self, fmat, port='/dev/ttyUSB0', baud=38400, log=None):
         self.log = log
-        self.fmat = re.compile(fmat).match
+        self.fmat = re.compile(fmat).search
         self._lock = Lock()
         self.data = deque()
         super().__init__(port, baud, 0.05, b'\r')
@@ -20,20 +20,25 @@ class LoadCellReader(Serial):
         super()._parse(sdata)
         with self._lock:
             while raw:
-                value = self.raw.pop()
-                match = df(value)
+                raw_val = self.raw.pop()
+                match = df(raw_val)
                 if not match:
-                    msg = "Value didn't match: {}".format(value)
+                    msg = "Value didn't match: {}".format(raw_val)
                     if self.log is not None:
                         self.log.warning(msg)
                     continue
                 data = match.groupdict()
                 for key, value in data.items():
                     try:
+                        # if it can be converted to an integer, do so
                         data[key] = int(value)
                     except (ValueError, TypeError):
-                        pass
+                        # otherwise, everything should be a string
+                        data[key] = value.decode()
+
                 mydata.appendleft(data)
+                print("logging...")
+                self.log.debug("LC in: {} | out: {}".format(raw_val, data))
 
     def read(self):
         '''Return a list of all data since last read'''

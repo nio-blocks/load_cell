@@ -23,18 +23,15 @@ class LoadCell(LoadCellReader, Block):
 
     def __init__(self):
         Block.__init__(self)
-        self._logger.debug('Initialized')
 
     def configure(self, context):
         Block.configure(self, context)
-        self._logger.debug("Configured")
 
     def start(self):
         Block.start(self)
         LoadCellReader.__init__(
             self, self.format.encode(), self.address, self.baud,
             log=self._logger)
-        self._logger.debug("Started")
 
     def _parse(self, sdata):
         LoadCellReader._parse(self, sdata)
@@ -43,5 +40,5 @@ class LoadCell(LoadCellReader, Block):
         signals = []
         while data:
             signals.append(Signal({name: data.pop()}))
-        self._logger.debug("Sending Signals")
-        self.notify_signals(signals)
+        if signals:
+            self.notify_signals(signals)
