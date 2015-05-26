@@ -34,11 +34,18 @@ class LoadCell(LoadCellReader, Block):
             log=self._logger)
 
     def _parse(self, sdata):
+        self.log.debug('starting block parse')
         LoadCellReader._parse(self, sdata)
         data = self.data
         name = self.sname
         signals = []
         while data:
-            signals.append(Signal({name: data.pop()}))
+            self.log.debug('prepare signal')
+            try:
+                signals.append(Signal({name: data.pop()}))
+            except:
+                self.log.exception('error preparing signal')
+        self.log.debug('notifying signal')
         if signals:
             self.notify_signals(signals)
+        self.log.debug('done with block parse')

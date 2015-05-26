@@ -11,15 +11,19 @@ class LoadCellReader(Serial):
         self.fmat = re.compile(fmat).search
         self._lock = Lock()
         self.data = deque()
-        super().__init__(port, baud, 0.05, b'\r')
+        super().__init__(port, baud, 0.05, b'\r', log=log)
 
     def _parse(self, sdata):
+        self.log.debug('starting reader parse')
         df = self.fmat
         raw = self.raw
         mydata = self.data
         super()._parse(sdata)
+        self.log.debug('raw: {}'.format(raw))
         with self._lock:
+            self.log.debug('has lock')
             while raw:
+                self.log.debug('has raw')
                 raw_val = self.raw.pop()
                 match = df(raw_val)
                 if not match:
@@ -39,6 +43,8 @@ class LoadCellReader(Serial):
                 mydata.appendleft(data)
                 print("logging...")
                 self.log.debug("LC in: {} | out: {}".format(raw_val, data))
+            self.log.debug('done with lock')
+        self.log.debug('done with reader parse')
 
     def read(self):
         '''Return a list of all data since last read'''
