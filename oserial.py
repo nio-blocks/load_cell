@@ -23,13 +23,18 @@ class Serial(object):
             # Setup the com port
             self._com = serial.Serial(port, baud)
             self._com.timeout = 0.15
-            self._com.readall()  # flush buffer
+            self._flush()
             self._com.timeout = timeout
 
             # Start the reading thread
             self._thread = Thread(target=self._read_thread)
             self._thread.daemon = True
             self._thread.start()
+
+    def _flush(self):
+        """ Read some large amount of bytes to clear the buffer """
+        self.log.debug('flush')
+        self._com.read(1000000)
 
     def _write(self, command):
         command = encode(command)
@@ -38,6 +43,15 @@ class Serial(object):
     def _read(self):
         self.log.debug('read')
         return self._com.readall()
+
+    def _readline(self):
+        self.log.debug('readline')
+        return_value = b''
+        latest_byte = b''
+        while latest_byte != self.eol:
+            latest_byte = self._com.read(1)
+            return_value += latest_byte
+        return return_value
 
     def _parse(self, data):
         self.log.debug('starting serial parse')
@@ -54,11 +68,13 @@ class Serial(object):
     def _read_thread(self):
         sleep_time = 0.2
         time.sleep(sleep_time)
+        # discard first line. it may be incomplete.
+        self._readline()
         while not self._kill:
             self.log.debug('read_thread loop')
             start = time.time()
             self.log.debug('start time'.format(start))
-            self._parse(self._read())
+            self._parse(self._readline())
             self.log.debug('done with parse')
             try:
                 self.log.debug('try sleep')
