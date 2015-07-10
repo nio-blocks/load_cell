@@ -1,9 +1,8 @@
 import re
 import time
+import serial
 from collections import deque
 from nio.modules.threading import Thread
-from serial import Serial
-
 from nio.common.block.base import Block
 from nio.common.signal.base import Signal
 from nio.metadata.properties.select import SelectProperty
@@ -35,8 +34,8 @@ class LoadCell(Block):
     def start(self):
         super().start()
         self.fmat = re.compile(self.format.encode()).search
-        self._com = Serial(self.address, self.baud)
-        self._eol = b'\r' 
+        self._com = serial.Serial(self.address, self.baud)
+        self._eol = b'\r'
         # Read some large amount of bytes to clear the buffer
         self._logger.debug('flush')
         self._com.timeout = 0.15
