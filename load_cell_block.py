@@ -10,11 +10,14 @@ from nio.metadata.properties.list import ListProperty
 from nio.metadata.properties.string import StringProperty
 from nio.metadata.properties.int import IntProperty
 from nio.metadata.properties.holder import PropertyHolder
+from nio.metadata.properties.version import VersionProperty
 from nio.common.discovery import Discoverable, DiscoverableType
 
 
 @Discoverable(DiscoverableType.block)
 class LoadCell(Block):
+
+    version = VersionProperty('0.1.0')
     sname = StringProperty(title="Signal Name", default="load")
     format = StringProperty(title="Format",
                             default=r'(?P<token>[a-zA-Z])(?P<id>\w*)'
