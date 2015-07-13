@@ -28,14 +28,13 @@ class LoadCell(Block):
         self.fmat = None
         self._com = None
         self._timeout = 0.05
-        self._eol = b'\n'
+        self._eol = b'\r'
         self._kill = False
 
     def start(self):
         super().start()
         self.fmat = re.compile(self.format.encode()).search
         self._com = serial.Serial(self.address, self.baud)
-        self._eol = b'\r'
         # Read some large amount of bytes to clear the buffer
         self._logger.debug('flush')
         self._com.timeout = 0.15
@@ -46,6 +45,10 @@ class LoadCell(Block):
         self._thread = Thread(target=self._read_thread)
         self._thread.daemon = True
         self._thread.start()
+
+    def stop(self):
+        self._kill = True
+        super().stop()
 
     def _read_thread(self):
         sleep_time = 0.002
@@ -71,7 +74,7 @@ class LoadCell(Block):
         self._logger.debug('readline')
         return_value = b''
         latest_byte = b''
-        while latest_byte != self._eol:
+        while latest_byte != self._eol and not self._kill:
             # TODO: This would be much faster if it read more than one byte
             latest_byte = self._com.read(1)
             return_value += latest_byte
