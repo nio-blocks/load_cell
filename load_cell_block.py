@@ -1,9 +1,8 @@
 import re
 import time
+import serial
 from collections import deque
 from nio.modules.threading import Thread
-from serial import Serial
-
 from nio.common.block.base import Block
 from nio.common.signal.base import Signal
 from nio.metadata.properties.select import SelectProperty
@@ -11,11 +10,14 @@ from nio.metadata.properties.list import ListProperty
 from nio.metadata.properties.string import StringProperty
 from nio.metadata.properties.int import IntProperty
 from nio.metadata.properties.holder import PropertyHolder
+from nio.metadata.properties.version import VersionProperty
 from nio.common.discovery import Discoverable, DiscoverableType
 
 
 @Discoverable(DiscoverableType.block)
 class LoadCell(Block):
+
+    version = VersionProperty('0.1.0')
     sname = StringProperty(title="Signal Name", default="load")
     format = StringProperty(title="Format",
                             default=r'(?P<token>[a-zA-Z])(?P<id>\w*)'
@@ -29,14 +31,13 @@ class LoadCell(Block):
         self.fmat = None
         self._com = None
         self._timeout = 0.05
-        self._eol = b'\n'
+        self._eol = b'\r'
         self._kill = False
 
     def start(self):
         super().start()
         self.fmat = re.compile(self.format.encode()).search
-        self._com = Serial(self.address, self.baud)
-        self._eol = b'\r' 
+        self._com = serial.Serial(self.address, self.baud)
         # Read some large amount of bytes to clear the buffer
         self._logger.debug('flush')
         self._com.timeout = 0.15
@@ -47,6 +48,10 @@ class LoadCell(Block):
         self._thread = Thread(target=self._read_thread)
         self._thread.daemon = True
         self._thread.start()
+
+    def stop(self):
+        self._kill = True
+        super().stop()
 
     def _read_thread(self):
         sleep_time = 0.002
@@ -72,7 +77,7 @@ class LoadCell(Block):
         self._logger.debug('readline')
         return_value = b''
         latest_byte = b''
-        while latest_byte != self._eol:
+        while latest_byte != self._eol and not self._kill:
             # TODO: This would be much faster if it read more than one byte
             latest_byte = self._com.read(1)
             return_value += latest_byte
