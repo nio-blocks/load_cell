@@ -1,24 +1,17 @@
 import re
-import time
 import serial
-from collections import deque
-from nio.modules.threading import Thread
-from nio.common.block.base import Block
-from nio.common.signal.base import Signal
-from nio.metadata.properties.select import SelectProperty
-from nio.metadata.properties.list import ListProperty
-from nio.metadata.properties.string import StringProperty
-from nio.metadata.properties.int import IntProperty
-from nio.metadata.properties.holder import PropertyHolder
-from nio.metadata.properties.version import VersionProperty
-from nio.common.discovery import Discoverable, DiscoverableType
+from threading import Thread
+import time
+from nio.block.base import Block
+from nio.signal.base import Signal
+from nio.properties import StringProperty, IntProperty, VersionProperty
+from nio.util.discovery import discoverable
 
 
-@Discoverable(DiscoverableType.block)
+@discoverable
 class LoadCell(Block):
 
     version = VersionProperty('0.1.0')
-    sname = StringProperty(title="Signal Name", default="load")
     format = StringProperty(title="Format",
                             default=r'(?P<token>[a-zA-Z])(?P<id>\w*)'
                             r'(?P<weight>\d{6})(?P<temperature>\d{3})'
@@ -36,14 +29,14 @@ class LoadCell(Block):
 
     def start(self):
         super().start()
-        self.fmat = re.compile(self.format.encode()).search
-        self._com = serial.Serial(self.address, self.baud)
+        self.fmat = re.compile(self.format().encode()).search
+        self._com = serial.Serial(self.address(), self.baud())
         # Read some large amount of bytes to clear the buffer
-        self._logger.debug('flush')
+        self.logger.debug('flush')
         self._com.timeout = 0.15
         self._com.read(100) # TODO: properly flush buffer at start
         self._com.timeout = self._timeout
-        self._logger.debug('done with flush')
+        self.logger.debug('done with flush')
         # Read from com port in new thread
         self._thread = Thread(target=self._read_thread)
         self._thread.daemon = True
@@ -60,55 +53,55 @@ class LoadCell(Block):
         self._readline()
         # Read until block stops
         while not self._kill:
-            self._logger.debug('read_thread loop')
+            self.logger.debug('read_thread loop')
             start = time.time()
-            self._logger.debug('start time: {}'.format(start))
+            self.logger.debug('start time: {}'.format(start))
             self._parse(self._readline())
-            self._logger.debug('done with parse')
+            self.logger.debug('done with parse')
             try:
-                self._logger.debug('try sleep')
+                self.logger.debug('try sleep')
                 time.sleep(sleep_time - (time.time() - start))
-                self._logger.debug('wake up!')
+                self.logger.debug('wake up!')
             except ValueError:
-                self._logger.debug('sleep error')
+                self.logger.debug('sleep error')
                 pass
 
     def _readline(self):
-        self._logger.debug('readline')
+        self.logger.debug('readline')
         return_value = b''
         latest_byte = b''
         while latest_byte != self._eol and not self._kill:
             # TODO: This would be much faster if it read more than one byte
             latest_byte = self._com.read(1)
             return_value += latest_byte
-        self._logger.debug('line read: {}'.format(return_value))
+        self.logger.debug('line read: {}'.format(return_value))
         return return_value
 
     def _parse(self, sdata):
-        self._logger.debug('starting block parse')
+        self.logger.debug('starting block parse')
         data = self._parse_raw_into_dict(sdata)
         signals = []
         if data:
-            self._logger.debug('prepare signal')
+            self.logger.debug('prepare signal')
             try:
-                signals.append(Signal({self.sname: data}))
+                signals.append(Signal({"load": data}))
             except:
-                self._logger.exception('error preparing signal')
-        self._logger.debug('notifying signal')
+                self.logger.exception('error preparing signal')
+        self.logger.debug('notifying signal')
         if signals:
             self.notify_signals(signals)
-        self._logger.debug('done with block parse')
+        self.logger.debug('done with block parse')
 
     def _parse_raw_into_dict(self, sdata):
-        self._logger.debug('starting reader parse')
+        self.logger.debug('starting reader parse')
         raw = sdata
-        self._logger.debug('raw: {}'.format(raw))
+        self.logger.debug('raw: {}'.format(raw))
         data = None
         if raw:
             match = self.fmat(raw)
             if not match:
                 msg = "Value didn't match: {}".format(raw)
-                self._logger.warning(msg)
+                self.logger.warning(msg)
                 return data
             data = match.groupdict()
             for key, value in data.items():
@@ -118,6 +111,6 @@ class LoadCell(Block):
                 except (ValueError, TypeError):
                     # otherwise, everything should be a string
                     data[key] = value.decode()
-            self._logger.debug("LC in: {} | out: {}".format(raw, data))
-        self._logger.debug('done with reader parse')
+            self.logger.debug("LC in: {} | out: {}".format(raw, data))
+        self.logger.debug('done with reader parse')
         return data

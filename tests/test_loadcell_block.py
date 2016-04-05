@@ -1,9 +1,7 @@
-import time
-from unittest.mock import patch, MagicMock
-from collections import defaultdict
-from nio.common.signal.base import Signal
-from nio.modules.threading import Event
-from nio.util.support.block_test_case import NIOBlockTestCase
+from threading import Event
+from unittest.mock import patch
+from nio.block.terminals import DEFAULT_TERMINAL
+from nio.testing.block_test_case import NIOBlockTestCase
 from ..load_cell_block import LoadCell
 
 
@@ -27,22 +25,14 @@ class LoadCellParseEvent(LoadCell):
     def _parse(self, sdata):
         super()._parse(sdata)
         self._parse_count += 1
-        self._logger.debug(
+        self.logger.debug(
             'Incrementing parse count to {}'.format(self._parse_count))
         if self._parse_count >= self._parse_limit:
-            self._logger.debug('Set parse event')
+            self.logger.debug('Set parse event')
             self._event.set()
 
 
 class TestLoadCellBlock(NIOBlockTestCase):
-
-    def setUp(self):
-        super().setUp()
-        # This will keep a list of signals notified for each output
-        self.last_notified = defaultdict(list)
-
-    def signals_notified(self, signals, output_id='default'):
-        self.last_notified[output_id].extend(signals)
 
     def test_load_cell_readline(self):
         e = Event()
@@ -58,7 +48,18 @@ class TestLoadCellBlock(NIOBlockTestCase):
         e.wait(1.5)
         blk.stop()
         self.assert_num_signals_notified(1, blk)
-        self.assertEqual(self.last_notified['default'][0].load['weight'], 197)
+        self.assertDictEqual(
+            self.last_notified[DEFAULT_TERMINAL][0].to_dict(),
+            {
+                'load': {
+                    'battery': 100,
+                    'id': 35851,
+                    'temperature': 104,
+                    'token': 'B',
+                    'weight': 197
+                }
+            }
+        )
 
     def test_load_cell_parse(self):
         blk = LoadCell()
@@ -69,4 +70,5 @@ class TestLoadCellBlock(NIOBlockTestCase):
         blk._parse(sample_data_1)
         blk.stop()
         self.assert_num_signals_notified(2, blk)
-        self.assertEqual(self.last_notified['default'][0].load['weight'], 197)
+        self.assertEqual(
+            self.last_notified[DEFAULT_TERMINAL][0].load['weight'], 197)
