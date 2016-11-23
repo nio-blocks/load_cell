@@ -56,8 +56,12 @@ class LoadCell(Block):
             self.logger.debug('read_thread loop')
             start = time.time()
             self.logger.debug('start time: {}'.format(start))
-            self._parse(self._readline())
-            self.logger.debug('done with parse')
+            line = self._readline()
+            if line and line[-1:] == self._eol:
+                self._parse_and_notify(line)
+                self.logger.debug('done with parse')
+            else:
+                self.logger.debug('did not read a valid line: {}'.format(line))
             try:
                 self.logger.debug('try sleep')
                 time.sleep(sleep_time - (time.time() - start))
@@ -72,12 +76,16 @@ class LoadCell(Block):
         latest_byte = b''
         while latest_byte != self._eol and not self._kill:
             # TODO: This would be much faster if it read more than one byte
-            latest_byte = self._com.read(1)
+            try:
+                latest_byte = self._com.read(1)
+            except:
+                self.logger.exception("Serial read failed: aborting readline")
+                return
             return_value += latest_byte
         self.logger.debug('line read: {}'.format(return_value))
         return return_value
 
-    def _parse(self, sdata):
+    def _parse_and_notify(self, sdata):
         self.logger.debug('starting block parse')
         data = self._parse_raw_into_dict(sdata)
         signals = []
