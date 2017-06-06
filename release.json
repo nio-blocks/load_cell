@@ -1,0 +1,7 @@
+{
+  "nio/LoadCell": {
+    "Language": "Python",
+    "Reference": "github.com/nio-blocks/load_cell.git@v1.0.0",
+    "Version": "1.0.0"
+  }
+}

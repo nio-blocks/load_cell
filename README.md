@@ -6,9 +6,9 @@ Read from load cells over serial
 Properties
 --------------
 
--   **address** (str): Serial port to read from
--   **baud** (int): Baud rate of serial port
--   **format** (str): Regular expression for parsing serial data stream
+-   **address** (type:string): Serial port to read from
+-   **baud** (type:int): Baud rate of serial port
+-   **format** (type:string): Regular expression for parsing serial data stream
 
 Dependencies
 ----------------
