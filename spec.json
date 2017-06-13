@@ -1,27 +1,28 @@
 {
-  "nio/LoadCell": {
-    "Output": "Outputs a signal with the attribute `load` for each load cell read.",
-    "Input": "None",
-    "Description": "Read from load cells over serial",
-    "Category": "Hardware",
-    "Dependencies": [
-      "-   [pyserial](https://pypi.python.org/pypi/pyserial)"
-    ],
-    "Version": "1.0.0",
-    "Properties": {
-      "format": {
-        "description": "Regular expression for parsing serial data stream",
-        "type": "string"
-      },
-      "address": {
-        "description": "Serial port to read from",
-        "type": "string"
-      },
-      "baud": {
-        "description": "Baud rate of serial port",
-        "type": "int"
-      }
-    },
-    "Commands": {}
-  }
+    "nio/LoadCell": {
+        "Version": "1.0.0",
+        "Description": "Read from load cells over serial",
+        "Output": {
+            "Description": "Outputs a signal with the attribute `load` for each load cell read."
+        },
+        "Commands": {},
+        "Category": "Hardware",
+        "Properties": {
+            "format": {
+                "description": "Regular expression for parsing serial data stream",
+                "type": "string"
+            },
+            "baud": {
+                "description": "Baud rate of serial port",
+                "type": "int"
+            },
+            "address": {
+                "description": "Serial port to read from",
+                "type": "string"
+            }
+        },
+        "Input": {
+            "Description": "None"
+        }
+    }
 }
