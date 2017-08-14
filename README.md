@@ -1,28 +1,23 @@
 LoadCell
 ========
-
-Read from load cells over serial
+Read from load cells over serial.
 
 Properties
---------------
+----------
+- **address**: Serial port to read from.
+- **baud**: Baud rate of serial port.
+- **format**: Regular expression for parsing serial data stream.
 
--   **address** (type:string): Serial port to read from
--   **baud** (type:int): Baud rate of serial port
--   **format** (type:string): Regular expression for parsing serial data stream
+Inputs
+------
 
-Dependencies
-----------------
-
--   [pyserial](https://pypi.python.org/pypi/pyserial)
+Outputs
+-------
+- **default**: Outputs a signal with the attribute `load` for each load cell read.
 
 Commands
-----------------
-None
+--------
 
-Input
--------
-None
-
-Output
----------
-Outputs a signal with the attribute `load` for each load cell read.
+Dependencies
+------------
+-   [pyserial](https://pypi.python.org/pypi/pyserial)

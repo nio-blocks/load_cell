@@ -1,14 +1,13 @@
 import re
 import serial
-from threading import Thread
 import time
+from threading import Thread
+
 from nio.block.base import Block
 from nio.signal.base import Signal
 from nio.properties import StringProperty, IntProperty, VersionProperty
-from nio.util.discovery import discoverable
 
 
-@discoverable
 class LoadCell(Block):
 
     version = VersionProperty('0.1.0')
@@ -34,7 +33,7 @@ class LoadCell(Block):
         # Read some large amount of bytes to clear the buffer
         self.logger.debug('flush')
         self._com.timeout = 0.15
-        self._com.read(100) # TODO: properly flush buffer at start
+        self._com.read(100)  # TODO: properly flush buffer at start
         self._com.timeout = self._timeout
         self.logger.debug('done with flush')
         # Read from com port in new thread
