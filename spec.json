@@ -1,10 +1,33 @@
 {
   "nio/LoadCell": {
-    "version": "0.0.1",
-    "description": "",
+    "version": "0.1.0",
+    "description": "Read from load cells over serial.",
+    "properties": {
+      "address": {
+        "title": "Address",
+        "type": "StringType",
+        "description": "Serial port to read from.",
+        "default": "/dev/ttyUSB0"
+      },
+      "baud": {
+        "title": "Baud",
+        "type": "IntType",
+        "description": "Baud rate of serial port.",
+        "default": 115200
+      },
+      "format": {
+        "title": "Format",
+        "type": "StringType",
+        "description": "Regular expression for parsing serial data stream.",
+        "default": "(?P<token>[a-zA-Z])(?P<id>\\w*)(?P<weight>\\d{6})(?P<temperature>\\d{3})(?P<battery>\\d{3})"
+      }
+    },
     "inputs": {},
-    "outputs": {},
-    "properties": {},
+    "outputs": {
+      "default": {
+        "description": "Outputs a signal with the attribute `load` for each load cell read."
+      }
+    },
     "commands": {}
   }
 }

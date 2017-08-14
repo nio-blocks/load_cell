@@ -1,9 +1,11 @@
 from threading import Event
 from unittest.mock import patch
+
 from nio.block.terminals import DEFAULT_TERMINAL
 from nio.testing.block_test_case import NIOBlockTestCase
-from ..load_cell_block import LoadCell
+from nio.util.discovery import not_discoverable
 
+from ..load_cell_block import LoadCell
 
 sample_data = (b'B035851000197104100\r'
                b'A035848000000104100\r'
@@ -14,6 +16,7 @@ sample_data_0 = (b'B035851000197104100\r')
 sample_data_1 = (b'A035848000000104100\r')
 
 
+@not_discoverable
 class LoadCellParseEvent(LoadCell):
 
     def __init__(self, event):
@@ -41,8 +44,8 @@ class TestLoadCellBlock(NIOBlockTestCase):
         with patch('serial.Serial'):
             blk.start()
         blk._com.read.side_effect = \
-            [b'B', b'0', b'3', b'\r', \
-             b'B', b'0', b'3', b'5', b'8', b'5', b'1', b'0', b'0', b'0', \
+            [b'B', b'0', b'3', b'\r',
+             b'B', b'0', b'3', b'5', b'8', b'5', b'1', b'0', b'0', b'0',
              b'1', b'9', b'7', b'1', b'0', b'4', b'1', b'0', b'0', b'\r']
         # wait for first parse
         e.wait(1.5)
