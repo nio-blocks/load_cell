@@ -3,12 +3,12 @@ import serial
 import time
 from threading import Thread
 
-from nio.block.base import Block
+from nio import GeneratorBlock
 from nio.signal.base import Signal
 from nio.properties import StringProperty, IntProperty, VersionProperty
 
 
-class LoadCell(Block):
+class LoadCell(GeneratorBlock):
 
     version = VersionProperty('0.1.0')
     format = StringProperty(title="Format",
