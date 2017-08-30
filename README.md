@@ -10,6 +10,7 @@ Properties
 
 Inputs
 ------
+None
 
 Outputs
 -------
@@ -17,6 +18,7 @@ Outputs
 
 Commands
 --------
+None
 
 Dependencies
 ------------
