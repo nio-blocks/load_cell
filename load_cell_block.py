@@ -10,7 +10,7 @@ from nio.properties import StringProperty, IntProperty, VersionProperty
 
 class LoadCell(GeneratorBlock):
 
-    version = VersionProperty('0.1.0')
+    version = VersionProperty("0.1.0")
     format = StringProperty(title="Format",
                             default=r'(?P<token>[a-zA-Z])(?P<id>\w*)'
                             r'(?P<weight>\d{6})(?P<temperature>\d{3})'
