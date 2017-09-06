@@ -2,6 +2,9 @@
   "nio/LoadCell": {
     "version": "0.1.0",
     "description": "Read from load cells over serial.",
+    "categories": [
+      "Hardware"
+    ],
     "properties": {
       "address": {
         "title": "Address",
